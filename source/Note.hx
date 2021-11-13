@@ -1,7 +1,5 @@
 package;
 
-import flixel.addons.effects.FlxSkewedSprite;
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
@@ -9,7 +7,6 @@ import flixel.util.FlxColor;
 #if polymod
 import polymod.format.ParseRules.TargetSignatureElement;
 #end
-import PlayState;
 
 using StringTools;
 
@@ -23,7 +20,7 @@ class Note extends FlxSprite
 	public var tooLate:Bool = false;
 	public var wasGoodHit:Bool = false;
 	public var prevNote:Note;
-	public var modifiedByLua:Bool = false;
+
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
 
@@ -35,9 +32,7 @@ class Note extends FlxSprite
 	public static var BLUE_NOTE:Int = 1;
 	public static var RED_NOTE:Int = 3;
 
-	public var rating:String = "shit";
-
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?inCharter:Bool = false)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false)
 	{
 		super();
 
@@ -50,29 +45,16 @@ class Note extends FlxSprite
 		x += 50;
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
-		if (inCharter)
-			this.strumTime = strumTime;
-		else 
-			this.strumTime = Math.round(strumTime);
-
-		if (this.strumTime < 0 )
-			this.strumTime = 0;
+		this.strumTime = strumTime;
 
 		this.noteData = noteData;
 
 		var daStage:String = PlayState.curStage;
 
-		//defaults if no noteStyle was found in chart
-		var noteTypeCheck:String = 'normal';
-
-		if (PlayState.SONG.noteStyle == null) {
-			switch(PlayState.storyWeek) {case 6: noteTypeCheck = 'pixel';}
-		} else {noteTypeCheck = PlayState.SONG.noteStyle;}
-
-		switch (noteTypeCheck)
+		switch (daStage)
 		{
-			case 'pixel':
-				loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels','week6'), true, 17, 17);
+			case 'school' | 'schoolEvil':
+				loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels'), true, 17, 17);
 
 				animation.add('greenScroll', [6]);
 				animation.add('redScroll', [7]);
@@ -81,7 +63,7 @@ class Note extends FlxSprite
 
 				if (isSustainNote)
 				{
-					loadGraphic(Paths.image('weeb/pixelUI/arrowEnds','week6'), true, 7, 6);
+					loadGraphic(Paths.image('weeb/pixelUI/arrowEnds'), true, 7, 6);
 
 					animation.add('purpleholdend', [4]);
 					animation.add('greenholdend', [6]);
@@ -96,23 +78,24 @@ class Note extends FlxSprite
 
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				updateHitbox();
+
 			default:
 				frames = Paths.getSparrowAtlas('NOTE_assets');
 
-				animation.addByPrefix('greenScroll', 'green instance 1');
-				animation.addByPrefix('redScroll', 'red instance 1');
-				animation.addByPrefix('blueScroll', 'blue instance 1');
-				animation.addByPrefix('purpleScroll', 'purple instance 1');
+				animation.addByPrefix('greenScroll', 'green0');
+				animation.addByPrefix('redScroll', 'red0');
+				animation.addByPrefix('blueScroll', 'blue0');
+				animation.addByPrefix('purpleScroll', 'purple0');
 
-				animation.addByPrefix('purpleholdend', 'pruple end hold instance 1');
-				animation.addByPrefix('greenholdend', 'green hold end instance 1');
-				animation.addByPrefix('redholdend', 'red hold end instance 1');
-				animation.addByPrefix('blueholdend', 'blue hold end instance 1');
+				animation.addByPrefix('purpleholdend', 'pruple end hold');
+				animation.addByPrefix('greenholdend', 'green hold end');
+				animation.addByPrefix('redholdend', 'red hold end');
+				animation.addByPrefix('blueholdend', 'blue hold end');
 
-				animation.addByPrefix('purplehold', 'purple hold piece instance 1');
-				animation.addByPrefix('greenhold', 'green hold piece instance 1');
-				animation.addByPrefix('redhold', 'red hold piece instance 1');
-				animation.addByPrefix('bluehold', 'blue hold piece instance 1');
+				animation.addByPrefix('purplehold', 'purple hold piece');
+				animation.addByPrefix('greenhold', 'green hold piece');
+				animation.addByPrefix('redhold', 'red hold piece');
+				animation.addByPrefix('bluehold', 'blue hold piece');
 
 				setGraphicSize(Std.int(width * 0.7));
 				updateHitbox();
@@ -136,12 +119,6 @@ class Note extends FlxSprite
 		}
 
 		// trace(prevNote);
-
-		// we make sure its downscroll and its a SUSTAIN NOTE (aka a trail, not a note)
-		// and flip it so it doesn't look weird.
-		// THIS DOESN'T FUCKING FLIP THE NOTE, CONTRIBUTERS DON'T JUST COMMENT THIS OUT JESUS
-		if (FlxG.save.data.downscroll && sustainNote) 
-			flipY = true;
 
 		if (isSustainNote && prevNote != null)
 		{
@@ -183,11 +160,7 @@ class Note extends FlxSprite
 						prevNote.animation.play('redhold');
 				}
 
-
-				if(FlxG.save.data.scrollSpeed != 1)
-					prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * FlxG.save.data.scrollSpeed;
-				else
-					prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
 				prevNote.updateHitbox();
 				// prevNote.setGraphicSize();
 			}
@@ -200,25 +173,14 @@ class Note extends FlxSprite
 
 		if (mustPress)
 		{
-			// ass
-			if (isSustainNote)
-			{
-				if (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * 1.5)
-					&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
-					canBeHit = true;
-				else
-					canBeHit = false;
-			}
+			// The * 0.5 is so that it's easier to hit them too late, instead of too early
+			if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
+				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
+				canBeHit = true;
 			else
-			{
-				if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-					&& strumTime < Conductor.songPosition + Conductor.safeZoneOffset)
-					canBeHit = true;
-				else
-					canBeHit = false;
-			}
+				canBeHit = false;
 
-			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset * Conductor.timeScale && !wasGoodHit)
+			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
 				tooLate = true;
 		}
 		else
