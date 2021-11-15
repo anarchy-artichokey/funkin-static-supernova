@@ -1,5 +1,7 @@
 package;
 
+import APIstuff.APIStuff;
+import APIstuff;
 #if desktop
 import Discord.DiscordClient;
 import sys.thread.Thread;
