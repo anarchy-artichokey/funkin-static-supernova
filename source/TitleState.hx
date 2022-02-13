@@ -62,6 +62,7 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
+	var kaiSpr:FlxSprite;
 
 	var curWacky:Array<String> = [];
 
@@ -380,6 +381,13 @@ class TitleState extends MusicBeatState
 		ngSpr.screenCenter(X);
 		ngSpr.antialiasing = ClientPrefs.globalAntialiasing;
 
+		kaiSpr = new FlxSprite(0, 0).loadGraphic(Paths.image('luckykaix'));
+		add(kaiSpr);
+		kaiSpr.visible = false;
+		kaiSpr.updateHitbox();
+		kaiSpr.screenCenter(X);
+		kaiSpr.antialiasing = ClientPrefs.globalAntialiasing;
+
 		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
 
 		if (initialized)
@@ -602,17 +610,19 @@ class TitleState extends MusicBeatState
 				// credTextShit.screenCenter();
 				case 5:
 					#if PSYCH_WATERMARKS
-					createCoolText(['Not associated', 'with'], -40);
+					createCoolText(['SS Dreamboat', 'created by'], -40);
 					#else
 					createCoolText(['In association', 'with'], -40);
 					#end
 				case 7:
-					addMoreText('newgrounds', -40);
-					ngSpr.visible = true;
+					addMoreText('luckykaix', -40);
+					//ngSpr.visible = true;
+					kaiSpr.visible = true;
 				// credTextShit.text += '\nNewgrounds';
 				case 8:
 					deleteCoolText();
-					ngSpr.visible = false;
+					//ngSpr.visible = false;
+					kaiSpr.visible = false;
 				// credTextShit.visible = false;
 
 				// credTextShit.text = 'Shoutouts Tom Fulp';
@@ -629,13 +639,13 @@ class TitleState extends MusicBeatState
 				// credTextShit.text = "Friday";
 				// credTextShit.screenCenter();
 				case 13:
-					addMoreText('Friday');
+					addMoreText('Friday Night Funkin');
 				// credTextShit.visible = true;
 				case 14:
-					addMoreText('Night');
+					addMoreText('Static');
 				// credTextShit.text += '\nNight';
 				case 15:
-					addMoreText('Funkin'); // credTextShit.text += '\nFunkin';
+					addMoreText('Supernova'); // credTextShit.text += '\nFunkin';
 
 				case 16:
 					skipIntro();
