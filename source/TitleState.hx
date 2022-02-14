@@ -381,7 +381,7 @@ class TitleState extends MusicBeatState
 		ngSpr.screenCenter(X);
 		ngSpr.antialiasing = ClientPrefs.globalAntialiasing;
 
-		kaiSpr = new FlxSprite(0, 0).loadGraphic(Paths.image('luckykaix'));
+		kaiSpr = new FlxSprite(0, FlxG.height * 0.52).loadGraphic(Paths.image('luckykaix'));
 		add(kaiSpr);
 		kaiSpr.visible = false;
 		kaiSpr.updateHitbox();
